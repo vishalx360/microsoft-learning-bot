@@ -1,0 +1,19 @@
+{
+  "name": "microsoft-learning-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx watch index.ts",
+    "start2": "tsx watch index2.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^3.0.1",
+    "puppeteer": "^21.3.8",
+    "tsx": "^3.13.0"
+  }
+}
