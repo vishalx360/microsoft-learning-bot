@@ -1,12 +1,19 @@
 import puppeteer, { Browser, Page } from "puppeteer";
-import LINKS from "./challenge_links.json";
+import LINKS from "./data/challenge_links.json";
+import dotenv from "dotenv";
+dotenv.config();
+const BROWSER_ID = process.env.BROWSER_ID;
+
+if (!BROWSER_ID) {
+  throw new Error("BROWSER_ID not found in .env file")
+}
 
 import fs from "fs"
 (async () => {
   // Connect to an existing Chrome instance with a remote debugging port
   const browser = await puppeteer.connect({
     browserWSEndpoint:
-      "ws://127.0.0.1:9222/devtools/browser/{BROWSER_ID}",
+      `ws://127.0.0.1:9222/devtools/browser/${BROWSER_ID}`,
   });
   await OpenNewTab(browser, "https://learn.microsoft.com/en-us/");
   let links = [];
