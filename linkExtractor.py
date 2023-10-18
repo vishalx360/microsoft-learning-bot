@@ -21,7 +21,7 @@ if __name__ == '__main__':
     links = extract_links_from_pdf(pdf_file_path)
 
     if links:
-        json_file_path = "links.json"  # You can change the output file name if needed
+        json_file_path = "./data/challenge_links.json"  # You can change the output file name if needed
         save_links_to_json(links, json_file_path)
         print(f"Links extracted and saved to {json_file_path}")
     else:

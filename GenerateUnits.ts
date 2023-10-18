@@ -1,42 +1,46 @@
 import puppeteer, { Browser, Page } from "puppeteer";
-import LINKS from "./links.json";
+import LINKS from "./challenge_links.json";
 
+import fs from "fs"
 (async () => {
   // Connect to an existing Chrome instance with a remote debugging port
   const browser = await puppeteer.connect({
     browserWSEndpoint:
-      "ws://127.0.0.1:9222/devtools/browser/b90c1626-3b68-4f35-b104-99a8a71e89a0",
+      "ws://127.0.0.1:9222/devtools/browser/{BROWSER_ID}",
   });
   await OpenNewTab(browser, "https://learn.microsoft.com/en-us/");
-
+  let links = [];
   for (const [index, challengeLink] of LINKS.entries()) {
     console.log(`Processing Challange : ${index + 1}/${LINKS.length}`);
 
     const ChallengePage = await OpenNewTab(browser, challengeLink);
-    const Modules = await fetchModuleLinks(ChallengePage)
+    const modules = await fetchModuleLinks(ChallengePage)
 
-    for (const [index, moduleLink] of Modules.entries()) {
-      console.log(`--  Module : ${index + 1}/${Modules.length}`);
-
-      const ModulePage = await OpenNewTab(browser, moduleLink);
-      const Units = await fetchUnitLinks(ModulePage);
-
-      const unitPromises = Units.map(async (unitLink, unitIndex) => {
-        console.log(` --- Unit : ${unitIndex + 1}/${Units.length}`);
-        const UnitPage = await OpenNewTab(browser, unitLink);
-        await checkRadioGroups(UnitPage);
-        UnitPage.close();
-      });
-
-      await Promise.all(unitPromises);
-
-      await ModulePage.close();
-    }
+    const modulePromises = modules.map(async (moduleLink, moduleIndex) => {
+      console.log(`--  Module: ${moduleIndex + 1}/${modules.length}`);
+      const modulePage = await OpenNewTab(browser, moduleLink);
+      const units = await fetchUnitLinks(modulePage);
+      await modulePage.close();
+      return units;
+    });
+    const allModuleUnits = await Promise.all(modulePromises);
+    links.push(allModuleUnits.flat());
     await ChallengePage.close();
   }
+
+  fs.writeFile('units.json', JSON.stringify(links, null, 2), 'utf8', (err) => {
+    if (err) {
+      console.error('Error writing to JSON file:', err);
+    } else {
+      console.log(`Writing ${links.length} unit links in units.json`);
+    }
+  });
+
 })().catch(err => {
   console.error(err);
 });
+
+
 
 async function OpenNewTab(browser: Browser, link: string) {
   const page = await browser.newPage();
